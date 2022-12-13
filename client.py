@@ -17,8 +17,9 @@ def receive():
             break
         try:
             message = client.recv(1024).decode("ascii")
-            print(message)
+            # print(message)
             if message == "Enter 1 for Login and 2 for Registration":
+                print("Enter 1 for Login and 2 for Registration")
                 response = input()
                 client.send(response.encode("ascii"))
                 next_message = client.recv(1024).decode('ascii')
@@ -34,32 +35,61 @@ def receive():
                     if client.recv(1024).decode('ascii') == "ACCESS REFUSED":
                         print("Connection was refused! Wrong password!")
                         stop_thread = True
-                elif next_message == "Please enter required info\nUsername:":
-                    username = input("Username: ")
-                    client.send(username.encode('ascii'))
+                elif next_message == "Please enter required info":
                     print(client.recv(1024).decode('ascii'))
                     username = input()
                     client.send(username.encode('ascii'))
-                write_thread = threading.Thread(target=write)
-                write_thread.start()
+
+                    print(client.recv(1024).decode('ascii'))
+                    password = input()
+                    client.send(password.encode('ascii'))
+
+                    print(client.recv(1024).decode('ascii'))
+                    name = input()
+                    client.send(name.encode('ascii'))
+
+                    print(client.recv(1024).decode('ascii'))
+                    surname = input()
+                    client.send(surname.encode('ascii'))
+
+                    print(client.recv(1024).decode('ascii'))
+                    jmbg = input()
+                    client.send(jmbg.encode('ascii'))
+
+                    print(client.recv(1024).decode('ascii'))
+                    email = input()
+                    client.send(email.encode('ascii'))
+
+                    print(client.recv(1024).decode('ascii'))
+                    tickets = input()
+                    client.send(tickets.encode('ascii'))
+                    if client.recv(1024).decode('ascii') == "ACCESS REFUSED":
+                        print("Connection was refused! Wrong password!")
+                        stop_thread = True
             else:
                 print(message)
+            write_thread = threading.Thread(target=write)
+            write_thread.start()
         except:
             print("An error occurred!")
             client.close()
             break
 
 
+# for sending messages while also getting messages
 def write():
     while True:
         if stop_thread:
             break
-        message = f"{username}: {input('')}"
-        client.send(message.encode("ascii"))
+        try:
+
+            message = f"{username}: {input('')}"
+            client.send(message.encode("ascii"))
+        except:
+            break
 
 
 receive_thread = threading.Thread(target=receive)
 receive_thread.start()
 
-# write_thread = threading.Thread(target=write)
-# write_thread.start()
+

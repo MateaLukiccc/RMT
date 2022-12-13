@@ -20,9 +20,12 @@ mydb = mysql.connector.connect(
 # I want one table that has password username and tickets reserved
 create_ticket_table_query = """
 CREATE TABLE reservations(
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    username VARCHAR(40),
+    username VARCHAR(40) PRIMARY KEY ,
+    name VARCHAR(40),
+    surname VARCHAR(40),
     password VARCHAR(30),
+    jmbg VARCHAR(13),
+    email VARCHAR(30),
     tickets INT
 )   
 """
@@ -44,13 +47,13 @@ with mydb.cursor() as cursor:
 
 # adding admin account
 insert_reservation_query = """
-INSERT INTO reservations (username, password, tickets)
+INSERT INTO reservations (username,name,surname, password,jmbg,email, tickets)
 VALUES
-    ("ROOT", "ROOT", 0)
+    ("ROOT","ROOT","ROOT", "ROOT","1111111111111","admin@admin", 1)
 """
 # with mydb.cursor() as cursor:
-#     cursor.execute(insert_reservation_query)
-#     mydb.commit()
+#      cursor.execute(insert_reservation_query)
+#      mydb.commit()
 
 #adding more records
 # insert_reviewers_query = """
@@ -122,3 +125,9 @@ WHERE
 # with connection.cursor() as cursor:
 #     cursor.execute(delete_query)
 #     connection.commit()
+
+
+#sum of a column
+# cursor = mydb.cursor()
+# cursor.execute("SELECT SUM(tickets) FROM reservations")
+# print(cursor.fetchall()[0][0])
