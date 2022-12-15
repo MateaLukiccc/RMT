@@ -30,8 +30,8 @@ def receive():
                     username = input()
                     client.send(username.encode('ascii'))
                     print(client.recv(1024).decode('ascii'))
-                    username = input()
-                    client.send(username.encode('ascii'))
+                    password = input()
+                    client.send(password.encode('ascii'))
                     if client.recv(1024).decode('ascii') == "ACCESS REFUSED":
                         print("Connection was refused! Wrong password!")
                         stop_thread = True
@@ -91,5 +91,8 @@ def write():
 
 receive_thread = threading.Thread(target=receive)
 receive_thread.start()
+
+
+
 
 
