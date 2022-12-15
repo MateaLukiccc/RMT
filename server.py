@@ -21,6 +21,19 @@ def get_remaining_tickets():
         OCCUPIED_SEATS = cursor.fetchall()[0][0]
     return TOTAL_TICKETS - OCCUPIED_SEATS
 
+def get_users_tickets(username):
+    with mydb.cursor() as cursor:
+        cursor.execute("SELECT tickets FROM reservations WHERE username=%s",(username,))
+        return cursor.fetchone()[0]
+
+def buy_tickets(username,tickets):
+    with mydb.cursor() as cursor:
+        new_tickets=get_users_tickets(username)+tickets
+        cursor.execute("UPDATE reservations SET tickets=%s WHERE username=%s",(new_tickets,username,))
+        mydb.commit()
+
+
+
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.bind((host, port))
@@ -67,11 +80,24 @@ def broadcast(message):
 
 
 
-def handle(client):
+def handle(client,username):
     while True:
         try:
-            message = client.recv(1024)
-            broadcast(message)
+            client.send("Select 1 for buying tickets 2 for vip 3 for remaining tickets".encode('ascii'))
+            message = client.recv(1024).decode('ascii')
+            if message == '1':
+                client.send("How many tickets would u like (0-4)".encode('ascii'))
+                tickets = int(client.recv(1024).decode('ascii'))
+                if get_remaining_tickets() < tickets or get_users_tickets(username)+tickets > 4:
+                    client.send("You cants buy that many tickets".encode('ascii'))
+                else:
+                    buy_tickets(username, tickets)
+                    s = "You have {} tickets".format(tickets)
+                    client.send(s.encode('ascii'))
+            else:
+                print("To be done")
+
+            broadcast("there are {} tickets left".format(get_remaining_tickets()).encode('ascii'))
         except:
             index = clients.index(client)
             clients.remove(client)
@@ -152,7 +178,7 @@ def initial(address, client):
         print(f"Username of a client is {username}")
         broadcast(f"{username} has joined the chat".encode("ascii"))
         client.send("Connected to the server".encode("ascii"))
-        thread = threading.Thread(target=handle, args=(client,))
+        thread = threading.Thread(target=handle, args=(client,username,))
         thread.start()
 
 

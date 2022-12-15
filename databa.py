@@ -131,3 +131,20 @@ WHERE
 # cursor = mydb.cursor()
 # cursor.execute("SELECT SUM(tickets) FROM reservations")
 # print(cursor.fetchall()[0][0])
+
+def get_users_tickets(username):
+    with mydb.cursor() as cursor:
+        cursor.execute("SELECT tickets FROM reservations WHERE username=%s",(username,))
+        return cursor.fetchone()[0]
+
+
+# with mydb.cursor() as cursor:
+#     new_tickets = 0
+#     cursor.execute("UPDATE reservations SET tickets=%s WHERE username=%s", (new_tickets, "Miona",))
+#     mydb.commit()
+
+
+# username = "Miona"
+# with mydb.cursor() as cursor:
+#     cursor.execute("SELECT tickets FROM reservations WHERE username=%s",(username,))
+#     print(cursor.fetchone()[0])
