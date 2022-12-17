@@ -1,5 +1,6 @@
 import socket
 import threading
+from datetime import datetime
 
 username = ""
 
@@ -96,13 +97,13 @@ def receive():
         print(client.recv(1024).decode('ascii'))
         if not stop_thread:
             print("Please choose to proceed")
-        write_thread = threading.Thread(target=write)
+        write_thread = threading.Thread(target=write, args=(username,))
         write_thread.start()
     except:
         print("Client closed")
 
 
-def write():
+def write(username):
     global stop_thread
     if not stop_thread:
         print('If you want to exit type exit')
@@ -132,7 +133,29 @@ def write():
                     client.send(message.encode("ascii"))
                     print(client.recv(1024).decode('ascii'))
                     print("Thank you for choosing our company")
-                    print("You could buy more if there are any tickets left")
+                    fileTickets = client.recv(1024).decode('ascii')
+                    fileName = username
+                    fileDate = (datetime.now()).strftime("%d/%m/%Y %H:%M:%S")
+                    if tickets == 1:
+                        with open(f"ticket{fileTickets}.txt", "w") as my_file:
+                            my_file.write(f"Congratulations you bought standard ticket number {fileTickets}\n"
+                                          f"On username {fileName} at {fileDate}")
+                    elif tickets == 2:
+                        with open(f"ticket{fileTickets}.txt", "w") as my_file:
+                            my_file.write(f"Congratulations you bought standard ticket number {fileTickets} to number "
+                                          f"{int(fileTickets)+1}\n"
+                                          f"On username {fileName} at {fileDate}")
+                    elif tickets == 3:
+                        with open(f"ticket{fileTickets}.txt", "w") as my_file:
+                            my_file.write(f"Congratulations you bought standard ticket number {fileTickets} to number "
+                                          f"{int(fileTickets)+2}\n"
+                                          f"On username {fileName} at {fileDate}")
+                    elif tickets == 4:
+                        with open(f"ticket{fileTickets}.txt", "w") as my_file:
+                            my_file.write(f"Congratulations you bought standard ticket number {fileTickets} to number "
+                                          f"{int(fileTickets)+3}\n"
+                                          f"On username {fileName} at {fileDate}")
+
                 elif received == "How many vip tickets would u like (0-4)":
                     message = input()
                     tickets = int(message)
@@ -143,7 +166,28 @@ def write():
                     client.send(message.encode("ascii"))
                     print(client.recv(1024).decode('ascii'))
                     print("Thank you for choosing our company")
-                    print("You could buy more if there are any tickets left")
+                    fileTickets = client.recv(1024).decode('ascii')
+                    fileName = username
+                    fileDate = (datetime.now()).strftime("%d/%m/%Y %H:%M:%S")
+                    if tickets == 1:
+                        with open(f"ticket{fileTickets}.txt", "w") as my_file:
+                            my_file.write(f"Congratulations you bought vip ticket number {fileTickets}\n"
+                                          f"On username {fileName} at {fileDate}")
+                    elif tickets == 2:
+                        with open(f"ticket{fileTickets}.txt", "w") as my_file:
+                            my_file.write(f"Congratulations you bought vip ticket number {fileTickets} to number "
+                                          f"{int(fileTickets)+1}\n"
+                                          f"On username {fileName} at {fileDate}")
+                    elif tickets == 3:
+                        with open(f"ticket{fileTickets}.txt", "w") as my_file:
+                            my_file.write(f"Congratulations you bought vip ticket number {fileTickets} to number "
+                                          f"{int(fileTickets)+2}\n"
+                                          f"On username {fileName} at {fileDate}")
+                    elif tickets == 4:
+                        with open(f"ticket{fileTickets}.txt", "w") as my_file:
+                            my_file.write(f"Congratulations you bought vip ticket number {fileTickets} to number "
+                                          f"{int(fileTickets)+3}\n"
+                                          f"On username {fileName} at {fileDate}")
                 elif received == 'Reservations review:':
                     print(client.recv(1024).decode('ascii'))
                     print("Thank you for choosing our company")
@@ -164,4 +208,4 @@ if __name__ == "__main__":
 
 
 
-
+# Obrisati rezervaciju i tekstualni fajl

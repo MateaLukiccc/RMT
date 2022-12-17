@@ -111,7 +111,6 @@ def handle(client, username):
         try:
             client.send("Select 1 for buying tickets 2 for vip 3 for remaining tickets".encode('ascii'))
             message = client.recv(1024).decode('ascii')
-            print(message)
             if message == '1':
                 client.send("How many tickets would u like (0-4)".encode('ascii'))
                 tickets = int(client.recv(1024).decode('ascii'))
@@ -123,6 +122,7 @@ def handle(client, username):
                         str(get_users_tickets(username)), str(get_remaining_standard_tickets()),
                         str(get_remaining_vip_tickets()))
                     client.send(s.encode('ascii'))
+                    client.send(str(20-get_remaining_standard_tickets()).encode('ascii'))
             elif message == '2':
                 client.send("How many vip tickets would u like (0-4)".encode('ascii'))
                 tickets = int(client.recv(1024).decode('ascii'))
@@ -135,6 +135,7 @@ def handle(client, username):
                         str(get_remaining_vip_tickets()))
 
                     client.send(s.encode('ascii'))
+                    client.send(str(20 - get_remaining_standard_tickets()).encode('ascii'))
             elif message == '3':
                 client.send("Reservations review:".encode('ascii'))
                 print("Getting users tickets")
@@ -143,7 +144,7 @@ def handle(client, username):
                 client.send(("There are {} tickets left from which {} are vip tickets".format(
                     str(get_remaining_standard_tickets()), str(get_remaining_vip_tickets()))).encode('ascii'))
 
-            
+
         except:
             index = clients.index(client)
             clients.remove(client)
