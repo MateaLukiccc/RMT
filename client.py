@@ -117,7 +117,7 @@ def write(username):
                 if message == 'exit':
                     stop_thread = True
                     break
-                elif message != '1' and message != '2' and message != '3':
+                elif message != '1' and message != '2' and message != '3' and message != '4' and message != '5':
                     print("Please choose 1 2 or 3 if you want to exit type exit")
 
                 client.send(message.encode("ascii"))
@@ -165,7 +165,6 @@ def write(username):
                         tickets = int(message)
                     client.send(message.encode("ascii"))
                     print(client.recv(1024).decode('ascii'))
-                    print("Thank you for choosing our company")
                     fileTickets = client.recv(1024).decode('ascii')
                     fileName = username
                     fileDate = (datetime.now()).strftime("%d/%m/%Y %H:%M:%S")
@@ -190,8 +189,23 @@ def write(username):
                                           f"On username {fileName} at {fileDate}")
                 elif received == 'Reservations review:':
                     print(client.recv(1024).decode('ascii'))
-                    print("Thank you for choosing our company")
-
+                    print(client.recv(1024).decode('ascii'))
+                elif received == 'How many standard tickets would you like to cancel':
+                    to_cancel = int(input())
+                    while to_cancel <= 0 or to_cancel > 4:
+                        print("Please enter number of tickets to cancel")
+                        to_cancel = int(input())
+                    client.send(str(to_cancel).encode('ascii'))
+                    print(client.recv(1024).decode('ascii'))
+                elif received == 'How many vip tickets would you like to cancel':
+                    message = input()
+                    tickets = int(message)
+                    while tickets <= 0 or tickets > 4:
+                        print("Please enter number of tickets to cancel")
+                        message = input()
+                        tickets = int(message)
+                    client.send(message.encode('ascii'))
+                    print(client.recv(1024).decode('ascii'))
 
         except:
             print("Invalid choice please check your input history for mistakes")
@@ -204,8 +218,3 @@ if __name__ == "__main__":
         receive_thread.start()
     except:
         print("Client closed")
-
-
-
-
-# Obrisati rezervaciju i tekstualni fajl

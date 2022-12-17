@@ -25,20 +25,26 @@ def get_remaining_standard_tickets():
 
 def get_users_tickets(username):
     with mydb.cursor() as cursor:
-        cursor.execute("SELECT tickets+VipTickets FROM reservations WHERE username=%s",(username,))
+        cursor.execute("SELECT tickets+VipTickets FROM reservations WHERE username=%s", (username,))
         return cursor.fetchone()[0]
 
 
 def get_users_vip_tickets(username):
     with mydb.cursor() as cursor:
-        cursor.execute("SELECT VipTickets FROM reservations WHERE username=%s",(username,))
+        cursor.execute("SELECT VipTickets FROM reservations WHERE username=%s", (username,))
+        return cursor.fetchone()[0]
+
+
+def get_users_standard_tickets(username):
+    with mydb.cursor() as cursor:
+        cursor.execute("SELECT tickets FROM reservations WHERE username=%s", (username,))
         return cursor.fetchone()[0]
 
 
 def buy_tickets(username, tickets):
     with mydb.cursor() as cursor:
         new_tickets=get_users_tickets(username)+tickets
-        cursor.execute("UPDATE reservations SET tickets=%s WHERE username=%s",(new_tickets,username,))
+        cursor.execute("UPDATE reservations SET tickets=%s WHERE username=%s", (new_tickets, username,))
         mydb.commit()
 
 
@@ -54,6 +60,20 @@ def get_remaining_vip_tickets():
         cursor.execute("SELECT SUM(VipTickets) FROM reservations")
         OCCUPIED_VIP_SEATS = cursor.fetchall()[0][0]
     return TOTAL_VIP_TICKETS-OCCUPIED_VIP_SEATS
+
+
+def cancel_standard_tickets(username, to_cancel):
+    with mydb.cursor() as cursor:
+        new_tickets = get_users_tickets(username) - to_cancel
+        cursor.execute("UPDATE reservations SET tickets=%s WHERE username=%s", (new_tickets, username,))
+        mydb.commit()
+
+
+def cancel_vip_tickets(username, to_cancel):
+    with mydb.cursor() as cursor:
+        new_tickets = get_users_vip_tickets(username) - to_cancel
+        cursor.execute("UPDATE reservations SET VipTickets=%s WHERE username=%s", (new_tickets, username,))
+        mydb.commit()
 
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -109,7 +129,8 @@ def check_db_username(username):
 def handle(client, username):
     while True:
         try:
-            client.send("Select 1 for buying tickets 2 for vip 3 for remaining tickets".encode('ascii'))
+            client.send("Select 1 for buying tickets 2 for vip 3 for remaining tickets 4 to cancel standard tickets 5"
+                        " to cancel vip tickets".encode('ascii'))
             message = client.recv(1024).decode('ascii')
             if message == '1':
                 client.send("How many tickets would u like (0-4)".encode('ascii'))
@@ -135,15 +156,32 @@ def handle(client, username):
                         str(get_remaining_vip_tickets()))
 
                     client.send(s.encode('ascii'))
-                    client.send(str(20 - get_remaining_standard_tickets()).encode('ascii'))
+                    client.send(("There are {} tickets left from which {} are vip tickets".format(
+                        str(get_remaining_standard_tickets()), str(get_remaining_vip_tickets()))).encode('ascii'))
+
             elif message == '3':
                 client.send("Reservations review:".encode('ascii'))
                 print("Getting users tickets")
-                client.send(("You have {} tickets from which {} are vip tickets".format(
-                    str(get_users_tickets(username)), str(get_users_vip_tickets(username)))).encode('ascii'))
-                client.send(("There are {} tickets left from which {} are vip tickets".format(
+                client.send(("You have {} standard and {} vip tickets".format(
+                    str(get_users_standard_tickets(username)), str(get_users_vip_tickets(username)))).encode('ascii'))
+                client.send(("There are {} standard tickets and {} vip tickets".format(
                     str(get_remaining_standard_tickets()), str(get_remaining_vip_tickets()))).encode('ascii'))
-
+            elif message == '4':
+                client.send("How many standard tickets would you like to cancel".encode('ascii'))
+                to_cancel = int(client.recv(1024).decode('ascii'))
+                if to_cancel > get_users_standard_tickets(username) or to_cancel < 0:
+                    client.send("You cant cancel more tickets than you have or less then 0".encode('ascii'))
+                else:
+                    cancel_standard_tickets(username, to_cancel)
+                    client.send(f"You now have {get_users_standard_tickets(username)} standard tickets".encode('ascii'))
+            elif message == '5':
+                client.send("How many vip tickets would you like to cancel".encode('ascii'))
+                to_cancel = int(client.recv(1024).decode('ascii'))
+                if to_cancel > get_users_vip_tickets(username) or to_cancel < 0:
+                    client.send("You cant cancel more tickets than you have or less then 0".encode('ascii'))
+                else:
+                    cancel_vip_tickets(username, to_cancel)
+                    client.send(f"You now have {get_users_vip_tickets(username)} vip tickets".encode('ascii'))
 
         except:
             index = clients.index(client)
