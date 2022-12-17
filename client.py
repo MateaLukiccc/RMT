@@ -1,12 +1,9 @@
-import socket
 import threading
 from datetime import datetime
+from client_setup import *
 
+client.connect((HOST, PORT))
 username = ""
-
-client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-client.connect(("127.0.0.1", 55556))
-
 stop_thread = False
 
 
@@ -17,34 +14,33 @@ def receive():
         if stop_thread:
             break
         try:
-            message = client.recv(1024).decode("ascii")
-            # print(message)
+            message = client.recv(BUFFER_SIZE).decode(FORMAT)
             if message == "Enter 1 for Login and 2 for Registration":
                 print("Enter 1 for Login and 2 for Registration")
                 response = input()
-                client.send(response.encode("ascii"))
-                next_message = client.recv(1024).decode('ascii')
+                client.send(response.encode(FORMAT))
+                next_message = client.recv(BUFFER_SIZE).decode(FORMAT)
                 print(next_message)
                 if next_message == "Welcome back":
                     print("Please enter required information :)")
-                    print(client.recv(1024).decode('ascii'))
+                    print(client.recv(BUFFER_SIZE).decode(FORMAT))
                     username = input()
-                    client.send(username.encode('ascii'))
-                    print(client.recv(1024).decode('ascii'))
+                    client.send(username.encode(FORMAT))
+                    print(client.recv(BUFFER_SIZE).decode(FORMAT))
                     password = input()
-                    client.send(password.encode('ascii'))
-                    if client.recv(1024).decode('ascii') == "ACCESS REFUSED":
+                    client.send(password.encode(FORMAT))
+                    if client.recv(BUFFER_SIZE).decode(FORMAT) == "ACCESS REFUSED":
                         print("Connection was refused! Wrong password!")
                         stop_thread = True
                 elif next_message == "Please enter required info":
-                    print(client.recv(1024).decode('ascii'))
+                    print(client.recv(BUFFER_SIZE).decode(FORMAT))
                     while True:
                         username = input()
                         while len(username) < 2:
                             print("Username must be at least 2 characters long. Please check your input and try again")
                             username = input()
-                        client.send(username.encode('ascii'))
-                        message = client.recv(1024).decode('ascii')
+                        client.send(username.encode(FORMAT))
+                        message = client.recv(BUFFER_SIZE).decode(FORMAT)
                         print(message)
                         if message == "This user already exist\nUsername: ":
                             continue
@@ -54,47 +50,46 @@ def receive():
                     while len(password) < 8:
                         print("Password must be at least 8 characters long. Please check your input and try again")
                         password = input()
-                    client.send(password.encode('ascii'))
+                    client.send(password.encode(FORMAT))
 
-                    print(client.recv(1024).decode('ascii'))
+                    print(client.recv(BUFFER_SIZE).decode(FORMAT))
                     name = input()
-                    client.send(name.encode('ascii'))
+                    client.send(name.encode(FORMAT))
 
-                    print(client.recv(1024).decode('ascii'))
+                    print(client.recv(BUFFER_SIZE).decode(FORMAT))
                     surname = input()
-                    client.send(surname.encode('ascii'))
+                    client.send(surname.encode(FORMAT))
 
-                    print(client.recv(1024).decode('ascii'))
+                    print(client.recv(BUFFER_SIZE).decode(FORMAT))
                     jmbg = input()
                     while len(jmbg) != 13:
                         print("JMBG must be 13 characters long. Please check your input and try again")
                         jmbg = input()
-                    client.send(jmbg.encode('ascii'))
+                    client.send(jmbg.encode(FORMAT))
 
-                    print(client.recv(1024).decode('ascii'))
+                    print(client.recv(BUFFER_SIZE).decode(FORMAT))
                     email = input()
-                    client.send(email.encode('ascii'))
+                    client.send(email.encode(FORMAT))
                     print(
                         "You can later choose vip tickets if you would like an upgrade this question is just for "
                         "standard tickets")
-                    print(client.recv(1024).decode('ascii'))
+                    print(client.recv(BUFFER_SIZE).decode(FORMAT))
 
                     tickets = input()
-                    client.send(tickets.encode('ascii'))
-                    if client.recv(1024).decode('ascii') == "ACCESS REFUSED":
+                    client.send(tickets.encode(FORMAT))
+                    if client.recv(BUFFER_SIZE).decode(FORMAT) == "ACCESS REFUSED":
                         print("Connection was refused! Wrong password!")
                         stop_thread = True
                 break
             else:
                 stop_thread = True
                 break
-            print(client.recv(1024).decode('ascii'))
         except:
             print("An error occurred!")
             client.close()
             break
     try:
-        print(client.recv(1024).decode('ascii'))
+        print(client.recv(BUFFER_SIZE).decode(FORMAT))
         if not stop_thread:
             print("Please choose to proceed")
         write_thread = threading.Thread(target=write, args=(username,))
@@ -112,16 +107,16 @@ def write(username):
             break
         try:
             while True:
-                print(client.recv(1024).decode('ascii'))
+                print(client.recv(BUFFER_SIZE).decode(FORMAT))
                 message = input()
                 if message == 'exit':
                     stop_thread = True
                     break
-                elif message != '1' and message != '2' and message != '3' and message != '4' and message != '5':
-                    print("Please choose 1 2 or 3 if you want to exit type exit")
+                elif int(message) not in one_to_five:
+                    print("Please choose 1, 2, 3, 4 or 5 if you want to exit type exit")
 
-                client.send(message.encode("ascii"))
-                received = client.recv(1024).decode('ascii')
+                client.send(message.encode(FORMAT))
+                received = client.recv(BUFFER_SIZE).decode(FORMAT)
                 print(received)
                 if received == "How many tickets would u like (0-4)":
                     message = input()
@@ -130,10 +125,10 @@ def write(username):
                         print("Cant buy more then 4 tickets or fewer then 0\nPlease choose again")
                         message = input()
                         tickets = int(message)
-                    client.send(message.encode("ascii"))
-                    print(client.recv(1024).decode('ascii'))
+                    client.send(message.encode(FORMAT))
+                    print(client.recv(BUFFER_SIZE).decode(FORMAT))
                     print("Thank you for choosing our company")
-                    fileTickets = client.recv(1024).decode('ascii')
+                    fileTickets = client.recv(BUFFER_SIZE).decode(FORMAT)
                     fileName = username
                     fileDate = (datetime.now()).strftime("%d/%m/%Y %H:%M:%S")
                     if tickets == 1:
@@ -163,40 +158,40 @@ def write(username):
                         print("Cant buy more then 4 tickets or fewer then 0\nPlease choose again")
                         message = input()
                         tickets = int(message)
-                    client.send(message.encode("ascii"))
-                    print(client.recv(1024).decode('ascii'))
-                    fileTickets = client.recv(1024).decode('ascii')
+                    client.send(message.encode(FORMAT))
+                    print(client.recv(BUFFER_SIZE).decode(FORMAT))
+                    fileTickets = client.recv(BUFFER_SIZE).decode(FORMAT)
                     fileName = username
                     fileDate = (datetime.now()).strftime("%d/%m/%Y %H:%M:%S")
                     if tickets == 1:
-                        with open(f"ticket{fileTickets}.txt", "w") as my_file:
+                        with open(f"vip_ticket{fileTickets}.txt", "w") as my_file:
                             my_file.write(f"Congratulations you bought vip ticket number {fileTickets}\n"
                                           f"On username {fileName} at {fileDate}")
                     elif tickets == 2:
-                        with open(f"ticket{fileTickets}.txt", "w") as my_file:
+                        with open(f"vip_ticket{fileTickets}.txt", "w") as my_file:
                             my_file.write(f"Congratulations you bought vip ticket number {fileTickets} to number "
                                           f"{int(fileTickets)+1}\n"
                                           f"On username {fileName} at {fileDate}")
                     elif tickets == 3:
-                        with open(f"ticket{fileTickets}.txt", "w") as my_file:
+                        with open(f"vip_ticket{fileTickets}.txt", "w") as my_file:
                             my_file.write(f"Congratulations you bought vip ticket number {fileTickets} to number "
                                           f"{int(fileTickets)+2}\n"
                                           f"On username {fileName} at {fileDate}")
                     elif tickets == 4:
-                        with open(f"ticket{fileTickets}.txt", "w") as my_file:
+                        with open(f"vip_ticket{fileTickets}.txt", "w") as my_file:
                             my_file.write(f"Congratulations you bought vip ticket number {fileTickets} to number "
                                           f"{int(fileTickets)+3}\n"
                                           f"On username {fileName} at {fileDate}")
                 elif received == 'Reservations review:':
-                    print(client.recv(1024).decode('ascii'))
-                    print(client.recv(1024).decode('ascii'))
+                    print(client.recv(BUFFER_SIZE).decode(FORMAT))
+                    print(client.recv(BUFFER_SIZE).decode(FORMAT))
                 elif received == 'How many standard tickets would you like to cancel':
                     to_cancel = int(input())
                     while to_cancel <= 0 or to_cancel > 4:
                         print("Please enter number of tickets to cancel")
                         to_cancel = int(input())
-                    client.send(str(to_cancel).encode('ascii'))
-                    print(client.recv(1024).decode('ascii'))
+                    client.send(str(to_cancel).encode(FORMAT))
+                    print(client.recv(BUFFER_SIZE).decode(FORMAT))
                 elif received == 'How many vip tickets would you like to cancel':
                     message = input()
                     tickets = int(message)
@@ -204,8 +199,8 @@ def write(username):
                         print("Please enter number of tickets to cancel")
                         message = input()
                         tickets = int(message)
-                    client.send(message.encode('ascii'))
-                    print(client.recv(1024).decode('ascii'))
+                    client.send(message.encode(FORMAT))
+                    print(client.recv(BUFFER_SIZE).decode(FORMAT))
 
         except:
             print("Invalid choice please check your input history for mistakes")
