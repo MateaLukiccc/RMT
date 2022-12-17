@@ -12,27 +12,48 @@ mydb = mysql.connector.connect(
 host = "127.0.0.1"
 port = 55556
 
-TOTAL_TICKETS = 40
+TOTAL_TICKETS = 20
+TOTAL_VIP_TICKETS = 5
 
 
-def get_remaining_tickets():
+def get_remaining_standard_tickets():
     with mydb.cursor() as cursor:
         cursor.execute("SELECT SUM(tickets) FROM reservations")
         OCCUPIED_SEATS = cursor.fetchall()[0][0]
     return TOTAL_TICKETS - OCCUPIED_SEATS
 
+
 def get_users_tickets(username):
     with mydb.cursor() as cursor:
-        cursor.execute("SELECT tickets FROM reservations WHERE username=%s",(username,))
+        cursor.execute("SELECT tickets+VipTickets FROM reservations WHERE username=%s",(username,))
         return cursor.fetchone()[0]
 
-def buy_tickets(username,tickets):
+
+def get_users_vip_tickets(username):
+    with mydb.cursor() as cursor:
+        cursor.execute("SELECT VipTickets FROM reservations WHERE username=%s",(username,))
+        return cursor.fetchone()[0]
+
+
+def buy_tickets(username, tickets):
     with mydb.cursor() as cursor:
         new_tickets=get_users_tickets(username)+tickets
         cursor.execute("UPDATE reservations SET tickets=%s WHERE username=%s",(new_tickets,username,))
         mydb.commit()
 
 
+def buy_vip_tickets(username, tickets):
+    with mydb.cursor() as cursor:
+        new_tickets = get_users_vip_tickets(username)+tickets
+        cursor.execute("UPDATE reservations SET VipTickets=%s WHERE username=%s", (new_tickets, username,))
+        mydb.commit()
+
+
+def get_remaining_vip_tickets():
+    with mydb.cursor() as cursor:
+        cursor.execute("SELECT SUM(VipTickets) FROM reservations")
+        OCCUPIED_VIP_SEATS = cursor.fetchall()[0][0]
+    return TOTAL_VIP_TICKETS-OCCUPIED_VIP_SEATS
 
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -59,12 +80,12 @@ def login(username, password):
         return 0
 
 
-def register(username, name, surname, password, jmbg, email, tickets):
+def register(username, name, surname, password, jmbg, email, tickets, VipTickets=0):
     cursor = mydb.cursor(buffered=True)
     try:
-        tuple1 = (username, name, surname, password, jmbg, email, tickets)
+        tuple1 = (username, name, surname, password, jmbg, email, tickets, VipTickets)
         cursor.execute(
-            'INSERT INTO reservations (username, name, surname, password, jmbg, email, tickets) VALUES (%s, %s, %s, %s, %s, %s, %s)', tuple1)
+            'INSERT INTO reservations (username, name, surname, password, jmbg, email, tickets, VipTickets) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)', tuple1)
         mydb.commit()
         print('Logged In!')
         return 1
@@ -73,44 +94,67 @@ def register(username, name, surname, password, jmbg, email, tickets):
         return 0
 
 
+def check_db_username(username):
+    cursor = mydb.cursor(buffered=True)
+    try:
+        cursor.execute("SELECT username FROM reservations WHERE username=%s", (username,))
+        if cursor.fetchone() is None:
+            return 1
+        else:
+            return 0
+    except:
+        return 0
 
-def broadcast(message):
-    for client in clients:
-        client.send(message)
 
-
-
-def handle(client,username):
+def handle(client, username):
     while True:
         try:
             client.send("Select 1 for buying tickets 2 for vip 3 for remaining tickets".encode('ascii'))
             message = client.recv(1024).decode('ascii')
+            print(message)
             if message == '1':
                 client.send("How many tickets would u like (0-4)".encode('ascii'))
                 tickets = int(client.recv(1024).decode('ascii'))
-                if get_remaining_tickets() < tickets or get_users_tickets(username)+tickets > 4:
+                if get_remaining_standard_tickets() < tickets or get_users_tickets(username)+tickets > 4:
                     client.send("You cants buy that many tickets".encode('ascii'))
                 else:
                     buy_tickets(username, tickets)
-                    s = "You have {} tickets".format(tickets)
+                    s = "You have {} tickets, {} standard and {} vip tickets left".format(
+                        str(get_users_tickets(username)), str(get_remaining_standard_tickets()),
+                        str(get_remaining_vip_tickets()))
                     client.send(s.encode('ascii'))
-            else:
-                print("To be done")
+            elif message == '2':
+                client.send("How many vip tickets would u like (0-4)".encode('ascii'))
+                tickets = int(client.recv(1024).decode('ascii'))
+                if get_remaining_vip_tickets() < tickets or get_users_tickets(username) + tickets > 4:
+                    client.send("You cants buy that many tickets".encode('ascii'))
+                else:
+                    buy_vip_tickets(username, tickets)
+                    s = "You have {} tickets, {} standard and {} vip tickets left".format(
+                        str(get_users_tickets(username)), str(get_remaining_standard_tickets()),
+                        str(get_remaining_vip_tickets()))
 
-            broadcast("there are {} tickets left".format(get_remaining_tickets()).encode('ascii'))
+                    client.send(s.encode('ascii'))
+            elif message == '3':
+                client.send("Reservations review:".encode('ascii'))
+                print("Getting users tickets")
+                client.send(("You have {} tickets from which {} are vip tickets".format(
+                    str(get_users_tickets(username)), str(get_users_vip_tickets(username)))).encode('ascii'))
+                client.send(("There are {} tickets left from which {} are vip tickets".format(
+                    str(get_remaining_standard_tickets()), str(get_remaining_vip_tickets()))).encode('ascii'))
+
+            
         except:
             index = clients.index(client)
             clients.remove(client)
             client.close()
             nickname = users[index]
-            broadcast(f"{nickname} left the chat!".encode('ascii'))
-            print(f"{nickname} left the chat!")
+            print(f"{nickname} left")
             users.remove(nickname)
             break
 
 
 def initial(address, client):
-    # while True:
         print(f"Connected with {str(address)}")
 
         client.send("Enter 1 for Login and 2 for Registration".encode("ascii"))
@@ -129,12 +173,19 @@ def initial(address, client):
                 client.send("ACCESS REFUSED".encode("ascii"))
                 client.close()
                 return
-                # continue
 
         elif initial_response == '2':
             client.send("Please enter required info".encode('ascii'))
             client.send("Username: ".encode('ascii'))
-            username = client.recv(1024).decode("ascii")
+            while True:
+                username = client.recv(1024).decode("ascii")
+                print(username)
+                print(check_db_username(username))
+                if check_db_username(username) == 0:
+                    print('yes')
+                    client.send("This user already exist\nUsername: ".encode("ascii"))
+                else:
+                    break
 
             client.send("Password: ".encode("ascii"))
             password = client.recv(1024).decode("ascii")
@@ -154,10 +205,9 @@ def initial(address, client):
 
             client.send("Email: ".encode("ascii"))
             email = client.recv(1024).decode("ascii")
-
             client.send("Number of tickets: ".encode("ascii"))
             tickets = client.recv(1024).decode("ascii")
-            if int(tickets) < 0 or int(tickets) > get_remaining_tickets():
+            if int(tickets) < 0 or int(tickets) > get_remaining_standard_tickets():
                 client.send("Wrong value for tickets".encode("ascii"))
                 client.close()
                 return
@@ -171,14 +221,13 @@ def initial(address, client):
 
         else:
             print("Please use correct input")
-            # continue
 
         users.append(username)
         clients.append(client)
         print(f"Username of a client is {username}")
-        broadcast(f"{username} has joined the chat".encode("ascii"))
+        client.send(f"{username} has joined the chat".encode("ascii"))
         client.send("Connected to the server".encode("ascii"))
-        thread = threading.Thread(target=handle, args=(client,username,))
+        thread = threading.Thread(target=handle, args=(client, username,))
         thread.start()
 
 

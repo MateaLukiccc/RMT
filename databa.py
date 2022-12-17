@@ -26,7 +26,8 @@ CREATE TABLE reservations(
     password VARCHAR(30),
     jmbg VARCHAR(13),
     email VARCHAR(30),
-    tickets INT
+    tickets INT,
+    VipTickets INT
 )   
 """
 
@@ -34,12 +35,12 @@ CREATE TABLE reservations(
 #     cursor.execute(create_ticket_table_query)
 #     mydb.commit()
 
-show_table_query = "DESCRIBE reservations"
-with mydb.cursor() as cursor:
-    cursor.execute(show_table_query)
-    result = cursor.fetchall()
-    for row in result:
-        print(row)
+# show_table_query = "DESCRIBE reservations"
+# with mydb.cursor() as cursor:
+#     cursor.execute(show_table_query)
+#     result = cursor.fetchall()
+#     for row in result:
+#         print(row)
 
 # drop_table_query = "DROP TABLE ratings"
 # with connection.cursor() as cursor:
@@ -47,9 +48,9 @@ with mydb.cursor() as cursor:
 
 # adding admin account
 insert_reservation_query = """
-INSERT INTO reservations (username,name,surname, password,jmbg,email, tickets)
+INSERT INTO reservations (username,name,surname, password,jmbg,email, tickets, VipTickets)
 VALUES
-    ("ROOT","ROOT","ROOT", "ROOT","1111111111111","admin@admin", 1)
+    ("ROOT","ROOT","ROOT", "ROOT","1111111111111","admin@admin", 1, 1)
 """
 # with mydb.cursor() as cursor:
 #      cursor.execute(insert_reservation_query)
@@ -90,12 +91,12 @@ VALUES
 #     connection.commit()
 
 # reading records
-select_reservations_query = "SELECT * FROM reservations"
-with mydb.cursor() as cursor:
-    cursor.execute(select_reservations_query)
-    result = cursor.fetchall()
-    for row in result:
-        print(row)
+# select_reservations_query = "SELECT * FROM reservations"
+# with mydb.cursor() as cursor:
+#     cursor.execute(select_reservations_query)
+#     result = cursor.fetchall()
+#     for row in result:
+#         print(row)
 
 # with where clause
 #  select_movies_query = """
@@ -148,3 +149,10 @@ def get_users_tickets(username):
 # with mydb.cursor() as cursor:
 #     cursor.execute("SELECT tickets FROM reservations WHERE username=%s",(username,))
 #     print(cursor.fetchone()[0])
+
+with mydb.cursor() as cursor:
+    cursor.execute("SELECT username FROM reservations WHERE username=%s", ('Dobby',))
+    if cursor.fetchone() is None:
+        print("Nema lik")
+    else:
+        print("Ima lik")
