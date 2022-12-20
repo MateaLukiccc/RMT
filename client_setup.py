@@ -8,3 +8,5 @@ BUFFER_SIZE = 1024
 FORMAT = "ascii"
 
 one_to_five = [1, 2, 3, 4, 5]
+one_two = [1, 2]
+

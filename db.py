@@ -39,7 +39,7 @@ def get_users_standard_tickets(username):
 
 def buy_tickets(username, tickets):
     with mydb.cursor() as cursor:
-        new_tickets=get_users_tickets(username)+tickets
+        new_tickets = get_users_tickets(username)+tickets
         cursor.execute("UPDATE reservations SET tickets=%s WHERE username=%s", (new_tickets, username,))
         mydb.commit()
 
@@ -60,7 +60,7 @@ def get_remaining_vip_tickets():
 
 def cancel_standard_tickets(username, to_cancel):
     with mydb.cursor() as cursor:
-        new_tickets = get_users_tickets(username) - to_cancel
+        new_tickets = get_users_standard_tickets(username) - to_cancel
         cursor.execute("UPDATE reservations SET tickets=%s WHERE username=%s", (new_tickets, username,))
         mydb.commit()
 

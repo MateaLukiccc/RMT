@@ -16,8 +16,11 @@ def receive():
         try:
             message = client.recv(BUFFER_SIZE).decode(FORMAT)
             if message == "Enter 1 for Login and 2 for Registration":
-                print("Enter 1 for Login and 2 for Registration")
+                print(message)
                 response = input()
+                while response.isalpha() or int(response) not in one_two:
+                    print("Enter 1 for Login and 2 for Registration")
+                    response = input()
                 client.send(response.encode(FORMAT))
                 next_message = client.recv(BUFFER_SIZE).decode(FORMAT)
                 print(next_message)
@@ -112,94 +115,100 @@ def write(username):
                 if message == 'exit':
                     stop_thread = True
                     break
-                elif int(message) not in one_to_five:
+
+                while message.isalpha() or int(message) not in one_to_five:
                     print("Please choose 1, 2, 3, 4 or 5 if you want to exit type exit")
+                    message = input()
 
                 client.send(message.encode(FORMAT))
                 received = client.recv(BUFFER_SIZE).decode(FORMAT)
                 print(received)
                 if received == "How many tickets would u like (0-4)":
                     message = input()
-                    tickets = int(message)
-                    while tickets > 4 or tickets < 0:
+                    while message.isalpha() or int(message) > 4 or int(message) < 0:
                         print("Cant buy more then 4 tickets or fewer then 0\nPlease choose again")
                         message = input()
-                        tickets = int(message)
-                    client.send(message.encode(FORMAT))
-                    print(client.recv(BUFFER_SIZE).decode(FORMAT))
-                    print("Thank you for choosing our company")
-                    fileTickets = client.recv(BUFFER_SIZE).decode(FORMAT)
-                    fileName = username
-                    fileDate = (datetime.now()).strftime("%d/%m/%Y %H:%M:%S")
-                    if tickets == 1:
-                        with open(f"ticket{fileTickets}.txt", "w") as my_file:
-                            my_file.write(f"Congratulations you bought standard ticket number {fileTickets}\n"
-                                          f"On username {fileName} at {fileDate}")
-                    elif tickets == 2:
-                        with open(f"ticket{fileTickets}.txt", "w") as my_file:
-                            my_file.write(f"Congratulations you bought standard ticket number {fileTickets} to number "
-                                          f"{int(fileTickets)+1}\n"
-                                          f"On username {fileName} at {fileDate}")
-                    elif tickets == 3:
-                        with open(f"ticket{fileTickets}.txt", "w") as my_file:
-                            my_file.write(f"Congratulations you bought standard ticket number {fileTickets} to number "
-                                          f"{int(fileTickets)+2}\n"
-                                          f"On username {fileName} at {fileDate}")
-                    elif tickets == 4:
-                        with open(f"ticket{fileTickets}.txt", "w") as my_file:
-                            my_file.write(f"Congratulations you bought standard ticket number {fileTickets} to number "
-                                          f"{int(fileTickets)+3}\n"
-                                          f"On username {fileName} at {fileDate}")
 
+                    tickets = int(message)
+                    client.send(message.encode(FORMAT))
+                    m = client.recv(BUFFER_SIZE).decode(FORMAT)
+                    print(m)
+                    if m != "You cant buy that many tickets":
+                        fileTickets = client.recv(BUFFER_SIZE).decode(FORMAT)
+                        fileName = username
+                        fileDate = (datetime.now()).strftime("%d/%m/%Y %H:%M:%S")
+                        if tickets == 1:
+                            with open(f"vip_ticket{fileTickets}.txt", "w") as my_file:
+                                my_file.write(f"Congratulations you bought vip ticket number {fileTickets}\n"
+                                              f"On username {fileName} at {fileDate}")
+                        elif tickets == 2:
+                            with open(f"vip_ticket{fileTickets}.txt", "w") as my_file:
+                                my_file.write(f"Congratulations you bought vip ticket number {fileTickets} to number "
+                                              f"{int(fileTickets) + 1}\n"
+                                              f"On username {fileName} at {fileDate}")
+                        elif tickets == 3:
+                            with open(f"vip_ticket{fileTickets}.txt", "w") as my_file:
+                                my_file.write(f"Congratulations you bought vip ticket number {fileTickets} to number "
+                                              f"{int(fileTickets) + 2}\n"
+                                              f"On username {fileName} at {fileDate}")
+                        elif tickets == 4:
+                            with open(f"vip_ticket{fileTickets}.txt", "w") as my_file:
+                                my_file.write(f"Congratulations you bought vip ticket number {fileTickets} to number "
+                                              f"{int(fileTickets) + 3}\n"
+                                              f"On username {fileName} at {fileDate}")
                 elif received == "How many vip tickets would u like (0-4)":
                     message = input()
-                    tickets = int(message)
-                    while tickets > 4 or tickets < 0:
+                    while message.isalpha() or int(message) > 4 or int(message) < 0:
                         print("Cant buy more then 4 tickets or fewer then 0\nPlease choose again")
                         message = input()
-                        tickets = int(message)
+
+                    tickets = int(message)
                     client.send(message.encode(FORMAT))
-                    print(client.recv(BUFFER_SIZE).decode(FORMAT))
-                    fileTickets = client.recv(BUFFER_SIZE).decode(FORMAT)
-                    fileName = username
-                    fileDate = (datetime.now()).strftime("%d/%m/%Y %H:%M:%S")
-                    if tickets == 1:
-                        with open(f"vip_ticket{fileTickets}.txt", "w") as my_file:
-                            my_file.write(f"Congratulations you bought vip ticket number {fileTickets}\n"
-                                          f"On username {fileName} at {fileDate}")
-                    elif tickets == 2:
-                        with open(f"vip_ticket{fileTickets}.txt", "w") as my_file:
-                            my_file.write(f"Congratulations you bought vip ticket number {fileTickets} to number "
-                                          f"{int(fileTickets)+1}\n"
-                                          f"On username {fileName} at {fileDate}")
-                    elif tickets == 3:
-                        with open(f"vip_ticket{fileTickets}.txt", "w") as my_file:
-                            my_file.write(f"Congratulations you bought vip ticket number {fileTickets} to number "
-                                          f"{int(fileTickets)+2}\n"
-                                          f"On username {fileName} at {fileDate}")
-                    elif tickets == 4:
-                        with open(f"vip_ticket{fileTickets}.txt", "w") as my_file:
-                            my_file.write(f"Congratulations you bought vip ticket number {fileTickets} to number "
-                                          f"{int(fileTickets)+3}\n"
-                                          f"On username {fileName} at {fileDate}")
+                    m = client.recv(BUFFER_SIZE).decode(FORMAT)
+                    print(m)
+                    if m != "You cant buy that many tickets":
+                        fileTickets = client.recv(BUFFER_SIZE).decode(FORMAT)
+                        fileName = username
+                        fileDate = (datetime.now()).strftime("%d/%m/%Y %H:%M:%S")
+                        if tickets == 1:
+                            with open(f"vip_ticket{fileTickets}.txt", "w") as my_file:
+                                my_file.write(f"Congratulations you bought vip ticket number {fileTickets}\n"
+                                              f"On username {fileName} at {fileDate}")
+                        elif tickets == 2:
+                            with open(f"vip_ticket{fileTickets}.txt", "w") as my_file:
+                                my_file.write(f"Congratulations you bought vip ticket number {fileTickets} to number "
+                                              f"{int(fileTickets)+1}\n"
+                                              f"On username {fileName} at {fileDate}")
+                        elif tickets == 3:
+                            with open(f"vip_ticket{fileTickets}.txt", "w") as my_file:
+                                my_file.write(f"Congratulations you bought vip ticket number {fileTickets} to number "
+                                              f"{int(fileTickets)+2}\n"
+                                              f"On username {fileName} at {fileDate}")
+                        elif tickets == 4:
+                            with open(f"vip_ticket{fileTickets}.txt", "w") as my_file:
+                                my_file.write(f"Congratulations you bought vip ticket number {fileTickets} to number "
+                                              f"{int(fileTickets)+3}\n"
+                                              f"On username {fileName} at {fileDate}")
                 elif received == 'Reservations review:':
                     print(client.recv(BUFFER_SIZE).decode(FORMAT))
                     print(client.recv(BUFFER_SIZE).decode(FORMAT))
                 elif received == 'How many standard tickets would you like to cancel':
-                    to_cancel = int(input())
-                    while to_cancel <= 0 or to_cancel > 4:
-                        print("Please enter number of tickets to cancel")
-                        to_cancel = int(input())
+                    to_cancel = input()
+                    while to_cancel.isalpha() or int(to_cancel) > 4 or int(to_cancel) < 0:
+                        print("Cant cancel more then 4 tickets or fewer then 0\nPlease choose again")
+                        to_cancel = input()
+
+                    to_cancel = int(to_cancel)
                     client.send(str(to_cancel).encode(FORMAT))
                     print(client.recv(BUFFER_SIZE).decode(FORMAT))
                 elif received == 'How many vip tickets would you like to cancel':
-                    message = input()
-                    tickets = int(message)
-                    while tickets <= 0 or tickets > 4:
-                        print("Please enter number of tickets to cancel")
-                        message = input()
-                        tickets = int(message)
-                    client.send(message.encode(FORMAT))
+                    to_cancel = input()
+                    while to_cancel.isalpha() or int(to_cancel) > 4 or int(to_cancel) < 0:
+                        print("Cant cancel more then 4 tickets or fewer then 0\nPlease choose again")
+                        to_cancel = input()
+
+                    to_cancel = int(to_cancel)
+                    client.send(str(to_cancel).encode(FORMAT))
                     print(client.recv(BUFFER_SIZE).decode(FORMAT))
 
         except:

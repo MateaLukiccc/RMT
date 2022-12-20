@@ -9,14 +9,14 @@ server.listen()
 def handle(client, username):
     while True:
         try:
-            client.send("Select 1 for buying tickets 2 for vip 3 for remaining tickets 4 to cancel standard tickets 5"
-                        " to cancel vip tickets".encode(FORMAT))
+            client.send("Select \n1 for buying tickets \n2 for vip \n3 for remaining tickets \n"
+                        "4 to cancel standard tickets \n5 to cancel vip tickets".encode(FORMAT))
             message = client.recv(BUFFER_SIZE).decode(FORMAT)
             if message == '1':
                 client.send("How many tickets would u like (0-4)".encode(FORMAT))
                 tickets = int(client.recv(BUFFER_SIZE).decode(FORMAT))
                 if get_remaining_standard_tickets() < tickets or get_users_tickets(username)+tickets > 4:
-                    client.send("You cants buy that many tickets".encode(FORMAT))
+                    client.send("You cant buy that many tickets".encode(FORMAT))
                 else:
                     buy_tickets(username, tickets)
                     s = f"You have {get_users_tickets(username)} tickets, {get_remaining_standard_tickets()} standard" \
@@ -27,7 +27,7 @@ def handle(client, username):
                 client.send("How many vip tickets would u like (0-4)".encode(FORMAT))
                 tickets = int(client.recv(BUFFER_SIZE).decode(FORMAT))
                 if get_remaining_vip_tickets() < tickets or get_users_tickets(username) + tickets > 4:
-                    client.send("You cants buy that many tickets".encode(FORMAT))
+                    client.send("You cant buy that many tickets".encode(FORMAT))
                 else:
                     buy_vip_tickets(username, tickets)
                     s = f"You have {get_users_tickets(username)} tickets, {get_remaining_standard_tickets()} standard" \
@@ -38,7 +38,6 @@ def handle(client, username):
 
             elif message == '3':
                 client.send("Reservations review:".encode(FORMAT))
-                print("Getting users tickets")
                 client.send(("You have {} standard and {} vip tickets".format(
                     str(get_users_standard_tickets(username)), str(get_users_vip_tickets(username)))).encode(FORMAT))
                 client.send(("There are {} standard tickets and {} vip tickets".format(
@@ -95,10 +94,8 @@ def initial(address, client):
             client.send("Username: ".encode(FORMAT))
             while True:
                 username = client.recv(BUFFER_SIZE).decode(FORMAT)
-                print(username)
-                print(check_db_username(username))
+
                 if check_db_username(username) == 0:
-                    print('yes')
                     client.send("This user already exist\nUsername: ".encode(FORMAT))
                 else:
                     break
