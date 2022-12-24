@@ -16,6 +16,8 @@ def get_remaining_standard_tickets():
     with mydb.cursor() as cursor:
         cursor.execute("SELECT SUM(tickets) FROM reservations")
         OCCUPIED_SEATS = cursor.fetchall()[0][0]
+        if OCCUPIED_SEATS is None:
+            OCCUPIED_SEATS = 0
     return TOTAL_TICKETS - OCCUPIED_SEATS
 
 
@@ -55,6 +57,8 @@ def get_remaining_vip_tickets():
     with mydb.cursor() as cursor:
         cursor.execute("SELECT SUM(VipTickets) FROM reservations")
         OCCUPIED_VIP_SEATS = cursor.fetchall()[0][0]
+        if OCCUPIED_VIP_SEATS is None:
+            OCCUPIED_VIP_SEATS = 0
     return TOTAL_VIP_TICKETS-OCCUPIED_VIP_SEATS
 
 
