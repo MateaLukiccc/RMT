@@ -41,7 +41,7 @@ def get_users_standard_tickets(username):
 
 def buy_tickets(username, tickets):
     with mydb.cursor() as cursor:
-        new_tickets = get_users_tickets(username)+tickets
+        new_tickets = get_users_standard_tickets(username)+tickets
         cursor.execute("UPDATE reservations SET tickets=%s WHERE username=%s", (new_tickets, username,))
         mydb.commit()
 

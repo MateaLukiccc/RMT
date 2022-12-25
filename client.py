@@ -138,21 +138,21 @@ def write(username):
                         fileName = username
                         fileDate = (datetime.now()).strftime("%d/%m/%Y %H:%M:%S")
                         if tickets == 1:
-                            with open(f"vip_ticket{fileTickets}.txt", "w") as my_file:
+                            with open(f"standard_ticket{fileTickets}.txt", "w") as my_file:
                                 my_file.write(f"Congratulations you bought vip ticket number {fileTickets}\n"
                                               f"On username {fileName} at {fileDate}")
                         elif tickets == 2:
-                            with open(f"vip_ticket{fileTickets}.txt", "w") as my_file:
+                            with open(f"standard_ticket{fileTickets}.txt", "w") as my_file:
                                 my_file.write(f"Congratulations you bought vip ticket number {fileTickets} to number "
                                               f"{int(fileTickets) + 1}\n"
                                               f"On username {fileName} at {fileDate}")
                         elif tickets == 3:
-                            with open(f"vip_ticket{fileTickets}.txt", "w") as my_file:
+                            with open(f"standard_ticket{fileTickets}.txt", "w") as my_file:
                                 my_file.write(f"Congratulations you bought vip ticket number {fileTickets} to number "
                                               f"{int(fileTickets) + 2}\n"
                                               f"On username {fileName} at {fileDate}")
                         elif tickets == 4:
-                            with open(f"vip_ticket{fileTickets}.txt", "w") as my_file:
+                            with open(f"standard_ticket{fileTickets}.txt", "w") as my_file:
                                 my_file.write(f"Congratulations you bought vip ticket number {fileTickets} to number "
                                               f"{int(fileTickets) + 3}\n"
                                               f"On username {fileName} at {fileDate}")
